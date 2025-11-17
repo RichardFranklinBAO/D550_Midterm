@@ -1,32 +1,43 @@
-````markdown
 # DATA 550 — Midterm Team Project
 ## NBA Per-36 Minutes Report (2025–26)
 
-This repository contains a reproducible pipeline that ingests NBA per-36 stats, cleans the data, produces a “Table 1” summary, generates figures, fits a simple regression, and renders a final HTML report. The workflow is parameterized via `config.yml` so the report can be customized to a specific team or run on the full dataset.
+This repository contains a reproducible pipeline that ingests NBA per-36 player stats, cleans data, produces a “Table 1” style summary, generates figures, fits a simple regression, and renders a final HTML report.  
+**Customization** is controlled via `config.yml` (e.g., run on ALL teams or a specific team).
 
-### Data
-* `data/nba_2025-10-30.csv`: Player per-36 stats (source: Basketball-Reference).
-* `data/nba_codebook.xlsx`: Variable descriptions.
+---
 
-### Repository Layout
+## Data
+
+- `data/nba_2025-10-30.csv` — Player per-36 minute stats (Basketball-Reference snapshot).
+- `data/nba_codebook.xlsx` — Variable dictionary.
+
+> Data are versioned in the repo for grading. If your institution restricts data sharing, replace with a same-schema synthetic file.
+
+---
+
+## Repository Layout
 
 ```text
 .
-├── config.yml                    # customization (e.g., team: "ALL" | "ATL" | ...)
-├── Makefile                      # build rules
+├── config.yml                    # customization (team filter etc.)
+├── Makefile                      # build rules (see below)
 ├── scripts/
-│   ├── 01_cleaning.R             # read data, clean, subset by team -> results/01_dataclean.Rds
-│   ├── 02_exploration.R          # creates summary table -> results/02_results/summary_table.html
-│   ├── 03_visualization.R        # creates figures -> results/03_results/*.png
-│   ├── 04_modeling.R             # fits lm(PTS ~ MP + Age + FG%) -> results/model_glance.rds
-│   └── 05_summary.R              # exports model glance -> results/model_glance.csv
+│   ├── 01_cleaning.R             # read, clean, standardize -> results/01_dataclean.Rds
+│   ├── 02_exploration.R          # summary table -> results/02_results/summary_table.html
+│   ├── 03_visualization.R        # figures -> results/03_results/*.png
+│   ├── 04_modeling.R             # lm(PTS ~ MP + Age + FG%) -> results/model_glance.rds/csv
+│   └── 05_summary.R              # (optional) exports model glance table
 ├── results/
 │   ├── 01_dataclean.Rds
-│   ├── 02_results/summary_table.html         # REQUIRED TABLE (see below)
-│   └── 03_results/                           # REQUIRED FIGURES (see below)
+│   ├── 02_results/summary_table.html         # REQUIRED TABLE
+│   └── 03_results/
+│       ├── hist_pts.png                       # REQUIRED FIGURE 1
+│       ├── box_pts_position.png               # REQUIRED FIGURE 2
+│       ├── top10_pts_bar.png                  # REQUIRED FIGURE 3
+│       └── scatter_mp_pts.png                 # REQUIRED FIGURE 4
 └── final_docs/
-    └── report.Rmd -> report.html
-````
+    ├── report.Rmd                             # composes all outputs
+    └── report.html                            # final artifact (built)
 
 ### Requirements
 
