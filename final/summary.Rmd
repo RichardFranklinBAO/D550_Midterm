@@ -1,0 +1,136 @@
+---
+title: "NBA Scoring Summary – Coder 1 (Shuyang Liu)"
+author: "Shuyang Liu"
+output: html_document
+---
+
+```{r setup}
+knitr::opts_chunk$set(
+  echo      = TRUE,
+  message   = FALSE,
+  warning   = FALSE,
+  fig.align = "center"
+)
+
+library(dplyr)
+library(ggplot2)
+library(gt)
+library(readr)
+library(here)
+library(htmltools)
+```
+
+# 1 Introduction / 
+
+This summary report consolidates key findings from our team’s analysis of the 2025–26 NBA per-36-minute player statistics dataset， including data cleaning, descriptive statistics, visualizations, and regression model results
+# 2 Data Overview / 
+
+```{r load-data}
+dat_clean <- readRDS(here("results", "01_dataclean.Rds"))
+glimpse(dat_clean)
+```
+
+```{r overall-summary}
+overall_summary <- dat_clean %>%
+  summarise(
+    n_players = n(),
+    mean_age = mean(Age),
+    sd_age = sd(Age),
+    mean_mp = mean(MP),
+    sd_mp = sd(MP),
+    mean_pts = mean(PTS),
+    sd_pts = sd(PTS)
+  )
+
+overall_summary %>%
+  tidyr::pivot_longer(everything()) %>%
+  gt() %>%
+  tab_header(title="Overall Summary", subtitle="Age, MP, and PTS")
+```
+
+# 3 Descriptive Statistics / 
+
+## 3.1 Cleaning Summary
+
+- Removed duplicates  
+- Standardized variable names  
+- Converted percentages to numeric  
+- Imputed missing values  
+- Output saved as `results/01_dataclean.Rds`
+
+## 3.2 Table 1 Results
+
+```{r include-table-all}
+path_all <- here("results", "02_results", "02_mean&sd_all.html")
+
+  includeHTML(path_all)
+
+```
+
+```{r include-table-team}
+path_team <- here("results", "02_results", "02_mean&sd_team.html")
+
+  includeHTML(path_team)
+```
+
+# 4 Visualizations / 
+
+## 4.1 Distribution of PTS
+
+```{r pts-hist}
+knitr::include_graphics(here("results","03_results","hist_pts.png"))
+```
+
+## 4.2 PTS by Position
+
+```{r pts-box}
+knitr::include_graphics(here("results","03_results","box_pts_position.png"))
+```
+
+## 4.3 Top 10 Scorers
+
+```{r pts-top10}
+knitr::include_graphics(here("results","03_results","top10_pts_bar.png"))
+```
+
+## 4.4 Scatter: MP vs PTS
+
+```{r pts-scatter}
+knitr::include_graphics(here("results","03_results","scatter_mp_pts.png"))
+```
+
+# 5 Modeling Summary / 
+
+```{r load-model}
+model_rds <- here("results", "04_results", "model_glance.rds")
+model_csv <- here("results", "04_results", "model_glance.csv")
+
+model_glance <- readRDS(model_rds)
+model_tidy   <- readRDS(here("results", "04_results", "model_tidy.rds"))
+```
+
+```{r show-model}
+  model_glance %>%
+    gt() %>%
+    tab_header(title="Model Summary", subtitle="Regression of PTS ~ MP + Age + FG%")
+
+
+model_tidy %>%
+  gt() %>%
+  tab_header(
+    title    = "Coefficient-level Results",
+    subtitle = "Estimates for MP, Age, FG% and other terms"
+  )
+
+
+```
+
+# 6 Overall Conclusion / 
+
+- From the descriptive Statistics section, across all NBA teams, some teams, such as BOS and GSW, have players with higher FG% and 3P% on average,  
+
+- From the visualizations section, the distribution of points per 36 minutes (PTS) is right-skewed, with most players scoring between 5 and 25 points. A small number of high-scoring players create a long right tail, showing that elite scorers are much less common.The scatter plot shows a positive relationship between minutes played (MP) and points per 36 minutes (PTS). Players who have more minutes tend to score slightly more. However, the spread of points shows substantial variability, suggesting that playing time alone does not fully explain scoring performance.
+
+- From the modeling section, the regression model shows that player scoring (PTS per 36 minutes) is strongly influenced by shooting efficiency and playing time. FG% has the largest positive coefficient and is highly significant, showing that players with better shooting efficiency score substantially more. Minutes Played (MP) is also a positive predictor of scoring, even after adjusting for age and FG%. However, age shows no significant relationship with scoring once other factors are controlled. Overall, the model explains about 30% of the variation in PTS, suggesting that while efficiency and playing time matter, additional factors outside this model also contribute to scoring performance. 
+
+
