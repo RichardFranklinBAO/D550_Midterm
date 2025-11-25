@@ -1,5 +1,9 @@
 all: report
 
+.PHONY: install
+install:
+	Rscript -e "renv::restore(prompt = FALSE)"
+	
 # 01: data cleaning
 results/01_dataclean.Rds: scripts/01_cleaning.R data/nba_2025-10-30.csv
 	Rscript scripts/01_cleaning.R
